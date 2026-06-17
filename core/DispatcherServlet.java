@@ -1,17 +1,33 @@
 package core;
 
 import java.io.IOException;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+import java.util.ArrayList;
+import java.util.List;
+import utils.ControllerUtils;
+// import 
+
 
 public class DispatcherServlet extends HttpServlet {
+    List<String> listeControllers = new ArrayList<>();
 
+    @Override
+    public void init() throws ServletException {
+        try{
+            String controllersPackage = getServletConfig().getInitParameter("controller");
+
+            listeControllers = utils.ControllerUtils.getControllers(controllersPackage);
+        }catch (Exception e) {
+            throw new ServletException("Erreur lors de l'initialisation du DispatcherServlet", e);
+        }
+    }
     public void affichage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String servletPath = request.getPathInfo();
-
-        response.getWriter().println("Servlet Path: " + servletPath);
+        for (String controller : listeControllers) {
+            response.getWriter().println("Controller: " + controller);
+        }
     }
 
     @Override

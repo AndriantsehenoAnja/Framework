@@ -54,6 +54,8 @@ jar cvf ../../$PROJECT_NAME.jar .
 cd ../..
 
 rm sources.txt
+rm ../applicationTest/lib/Framework.jar
+cp Framework.jar ../applicationTest/lib/
 
 echo ""
 echo "JAR généré : $PROJECT_NAME.jar"
