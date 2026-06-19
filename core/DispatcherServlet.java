@@ -6,28 +6,58 @@ import jakarta.servlet.http.*;
 import java.util.ArrayList;
 import java.util.List;
 import utils.ControllerUtils;
-// import 
-
+import utils.Dto.InfoMethodeAndController;
 
 public class DispatcherServlet extends HttpServlet {
     List<String> listeControllers = new ArrayList<>();
-
+    List<InfoMethodeAndController> listeInfoMethodeAndController = new ArrayList<>();
     @Override
     public void init() throws ServletException {
         try{
             String controllersPackage = getServletConfig().getInitParameter("controller");
-
-            listeControllers = utils.ControllerUtils.getControllers(controllersPackage);
+            for(Class clazz:utils.ControllerUtils.getControllers(controllersPackage)){
+                listeControllers.add(clazz.getName());
+            }
+            List<InfoMethodeAndController> infoMethodeAndControllers = utils.ControllerUtils.findAllMethodes(controllersPackage);
+            listeInfoMethodeAndController.addAll(infoMethodeAndControllers);
         }catch (Exception e) {
             throw new ServletException("Erreur lors de l'initialisation du DispatcherServlet", e);
         }
     }
     public void affichage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String servletPath = request.getPathInfo();
+        String servletPath = request.getRequestURI();
+        String nameApplication = request.getContextPath();
+        String url = servletPath.substring(nameApplication.length());
+
+        response.getWriter().println(
+            "<!doctype html>\n" +
+            "<html lang=\"en\">\n" +
+            "<head>\n" +
+            "    <meta charset=\"utf-8\">\n" +
+            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n" +
+            "    <title>Liste des controllers et methodes</title>\n" +
+            "</head>\n" +
+            "<body>\n" +
+            "<h1>Liste des controllers et methodes</h1>\n" +
+            "<ul>"
+        );
+
         for (String controller : listeControllers) {
-            response.getWriter().println("Controller: " + controller);
+            response.getWriter().println("<li>Controller: " + controller + "</li>");
         }
+
+        InfoMethodeAndController infoMethodeAndController = utils.ControllerUtils.findClassByUrl(listeInfoMethodeAndController, url);
+
+        if (infoMethodeAndController == null) {
+            for (InfoMethodeAndController info : listeInfoMethodeAndController) {
+                response.getWriter().println("<li>" + info.toString() + "</li>");
+            }
+        } else {
+            response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
+        }
+
+        response.getWriter().println("</ul></body></html>");
     }
 
     @Override
