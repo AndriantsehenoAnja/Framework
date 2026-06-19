@@ -1,16 +1,35 @@
 package utils;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
+import java.lang.reflect.Method;
 public class ControllerUtils {
-    public static List<String> getControllers(String packageName) {
+    public boolean isAnnotationMethod(Class<?> clazz){
+        if(clazz.isAnnotationPresent(mg.etu4370.annotation.UrlMapping.class)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    public List<Method> findMethod(Class<?> clazz){
+        List<Method> methods = new ArrayList<>();
+        for(Method method : clazz.getDeclaredMethods()){
+            if(isAnnotationMethod(method.getClass())){
+                methods.add(method);
+            }
+        }
+        return methods;
+    }
+
+    public static List<Class<?>> getControllers(String packageName) {
         List<Class<?>> classe = new ArrayList<>();
 
         List<Class<?>> classes = findClass(packageName,classe);
-        List<String> controllerNames = new ArrayList<>();
+        List<Class<?>> controllerNames = new ArrayList<>();
         for (Class<?> clazz : classes) {
             if (clazz.isAnnotationPresent(mg.etu4370.annotation.Controller.class)) {
-                controllerNames.add(clazz.getName());
+                controllerNames.add(clazz);
             }
         }
         return controllerNames;

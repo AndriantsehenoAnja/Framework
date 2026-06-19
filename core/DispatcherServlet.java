@@ -16,8 +16,10 @@ public class DispatcherServlet extends HttpServlet {
     public void init() throws ServletException {
         try{
             String controllersPackage = getServletConfig().getInitParameter("controller");
-
-            listeControllers = utils.ControllerUtils.getControllers(controllersPackage);
+            for(Class clazz:utils.ControllerUtils.getControllers(controllersPackage)){
+                listeControllers.add(clazz.getName());
+            }
+            // listeControllers = ;
         }catch (Exception e) {
             throw new ServletException("Erreur lors de l'initialisation du DispatcherServlet", e);
         }
