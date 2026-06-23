@@ -3,10 +3,10 @@ package utils;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
-import mg.etu4370.annotation.UrlMapping;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import mg.etu4370.annotation.UrlMapping;
 
 public class ControllerUtils {
     public static boolean isAnnotationMethod(Method m) {
@@ -17,6 +17,27 @@ public class ControllerUtils {
         }
     }
 
+    public static Map<UrlMethod, ClassMethod> findAllMethodesWithUrlMethod(String packageName) {
+        Map<UrlMethod, ClassMethod> map = new HashMap<>();
+        List<Class<?>> controllerClasses = getControllers(packageName);
+        for (Class<?> controllerClass : controllerClasses) {
+            for (Method method : controllerClass.getDeclaredMethods()) {
+                if (isAnnotationMethod(method)) {
+                    UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
+                    String url = urlMapping.value();
+                    String httpMethod = urlMapping.method();
+                    UrlMethod urlMethod = new UrlMethod(url, httpMethod);
+                    ClassMethod classMethod = new ClassMethod(controllerClass, method);
+                    map.put(urlMethod, classMethod);
+                }
+            }
+        }
+        return map;
+    }
+
+    public static ClassMethod findClassByUrlMethod(Map<UrlMethod, ClassMethod> map, String url, String httpMethod) {
+        return map.get(new UrlMethod(url, httpMethod));
+    }
     public static Map<String, ClassMethod> findAllMethodes(String packageName) {
         Map<String, ClassMethod> map = new HashMap<>();
         List<Class<?>> controllerClasses = getControllers(packageName);
