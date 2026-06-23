@@ -55,7 +55,14 @@ public class DispatcherServlet extends HttpServlet {
                 response.getWriter().println("<li>" + info.toString() + "</li>");
             }
         } else {
-            response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
+            // response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
+            infoMethodeAndController.getMethod().setAccessible(true);
+            try {
+                Object controllerInstance = infoMethodeAndController.getClazz().getDeclaredConstructor().newInstance();
+                infoMethodeAndController.getMethod().invoke(controllerInstance, request, response); 
+            } catch (Exception e) {
+                throw new ServletException("Erreur lors de l'invocation de la méthode du contrôleur", e);
+            }
         }
 
         response.getWriter().println("</ul></body></html>");

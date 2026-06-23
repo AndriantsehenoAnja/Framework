@@ -35,5 +35,4 @@ public class UrlMethod {
     public int hashCode() {
         return Objects.hash(url, method);
     }
-
 }

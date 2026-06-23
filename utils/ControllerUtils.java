@@ -38,25 +38,25 @@ public class ControllerUtils {
     public static ClassMethod findClassByUrlMethod(Map<UrlMethod, ClassMethod> map, String url, String httpMethod) {
         return map.get(new UrlMethod(url, httpMethod));
     }
-    public static Map<String, ClassMethod> findAllMethodes(String packageName) {
-        Map<String, ClassMethod> map = new HashMap<>();
-        List<Class<?>> controllerClasses = getControllers(packageName);
-        for (Class<?> controllerClass : controllerClasses) {
-            for (Method method : controllerClass.getDeclaredMethods()) {
-                if (isAnnotationMethod(method)) {
-                    UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
-                    String url = urlMapping.value();
-                    ClassMethod classMethod = new ClassMethod(controllerClass, method);
-                    map.put(url, classMethod);
-                }
-            }
-        }
-        return map;
-    }
+    // public static Map<String, ClassMethod> findAllMethodes(String packageName) {
+    //     Map<String, ClassMethod> map = new HashMap<>();
+    //     List<Class<?>> controllerClasses = getControllers(packageName);
+    //     for (Class<?> controllerClass : controllerClasses) {
+    //         for (Method method : controllerClass.getDeclaredMethods()) {
+    //             if (isAnnotationMethod(method)) {
+    //                 UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
+    //                 String url = urlMapping.value();
+    //                 ClassMethod classMethod = new ClassMethod(controllerClass, method);
+    //                 map.put(url, classMethod);
+    //             }
+    //         }
+    //     }
+    //     return map;
+    // }
 
-    public static ClassMethod findClassByUrl(Map<String, ClassMethod> map, String url) {
-        return map.get(url);
-    }
+    // public static ClassMethod findClassByUrl(Map<String, ClassMethod> map, String url) {
+    //     return map.get(url);
+    // }
 
     public static List<Class<?>> getControllers(String packageName) {
         List<Class<?>> classe = new ArrayList<>();
