@@ -5,9 +5,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import mg.etu4370.annotation.UrlMapping;
-import utils.Dto.InfoMethodeAndController;
-public class ControllerUtils {
+import java.util.HashMap;
+import java.util.Map;
 
+public class ControllerUtils {
     public static boolean isAnnotationMethod(Method m) {
         if (m.isAnnotationPresent(UrlMapping.class)) {
             return true;
@@ -16,42 +17,26 @@ public class ControllerUtils {
         }
     }
 
-    public static List<Method> findMethod(Class<?> clazz) {
-        List<Method> methods = new ArrayList<>();
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (isAnnotationMethod(method)) {
-                methods.add(method);
-            }
-        }
-        return methods;
-    }
-    public static List<InfoMethodeAndController> findAllMethodes(String packageName){
-        
-        List<InfoMethodeAndController> infoMethodeAndControllers = new ArrayList<>();
+    public static Map<String, ClassMethod> findAllMethodes(String packageName) {
+        Map<String, ClassMethod> map = new HashMap<>();
         List<Class<?>> controllerClasses = getControllers(packageName);
         for (Class<?> controllerClass : controllerClasses) {
-            List<Method> methods = findMethod(controllerClass);
-            for (Method method : methods) {
-                UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
-                String url = urlMapping.value();
-                String methodName = method.getName();
-                String controllerName = controllerClass.getSimpleName();
-                InfoMethodeAndController infoMethodeAndController = new InfoMethodeAndController(url, methodName, controllerName);
-                infoMethodeAndControllers.add(infoMethodeAndController);
+            for (Method method : controllerClass.getDeclaredMethods()) {
+                if (isAnnotationMethod(method)) {
+                    UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
+                    String url = urlMapping.value();
+                    ClassMethod classMethod = new ClassMethod(controllerClass, method);
+                    map.put(url, classMethod);
+                }
             }
         }
-        return infoMethodeAndControllers;
-    }
-    public static InfoMethodeAndController findClassByUrl(List<InfoMethodeAndController> infoMethodeAndControllers, String url) {
-        for (InfoMethodeAndController infoMethodeAndController : infoMethodeAndControllers) {
-            if(infoMethodeAndController.getUrl().equals(url)){
-                return infoMethodeAndController;
-            }
-        }
-        return null;
+        return map;
     }
 
-    // getContextPath
+    public static ClassMethod findClassByUrl(Map<String, ClassMethod> map, String url) {
+        return map.get(url);
+    }
+
     public static List<Class<?>> getControllers(String packageName) {
         List<Class<?>> classe = new ArrayList<>();
 
@@ -79,7 +64,8 @@ public class ControllerUtils {
                 if (files != null) {
                     for (File file : files) {
                         if (file.getName().endsWith(".class")) {
-                            String className = packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
+                            String className = packageName + '.'
+                                    + file.getName().substring(0, file.getName().length() - 6);
                             classes.add(Class.forName(className));
                         } else if (file.isDirectory()) {
                             // classes.add(Class.forName(file.getName()));

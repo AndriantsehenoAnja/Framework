@@ -5,12 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import utils.ControllerUtils;
-import utils.Dto.InfoMethodeAndController;
+import utils.ClassMethod;
 
 public class DispatcherServlet extends HttpServlet {
     List<String> listeControllers = new ArrayList<>();
-    List<InfoMethodeAndController> listeInfoMethodeAndController = new ArrayList<>();
+    Map<String,ClassMethod> listeInfoMethodeAndController = new HashMap<>();
     @Override
     public void init() throws ServletException {
         try{
@@ -18,8 +20,7 @@ public class DispatcherServlet extends HttpServlet {
             for(Class clazz:utils.ControllerUtils.getControllers(controllersPackage)){
                 listeControllers.add(clazz.getName());
             }
-            List<InfoMethodeAndController> infoMethodeAndControllers = utils.ControllerUtils.findAllMethodes(controllersPackage);
-            listeInfoMethodeAndController.addAll(infoMethodeAndControllers);
+            listeInfoMethodeAndController = utils.ControllerUtils.findAllMethodes(controllersPackage);
         }catch (Exception e) {
             throw new ServletException("Erreur lors de l'initialisation du DispatcherServlet", e);
         }
@@ -43,14 +44,10 @@ public class DispatcherServlet extends HttpServlet {
             "<ul>"
         );
 
-        for (String controller : listeControllers) {
-            response.getWriter().println("<li>Controller: " + controller + "</li>");
-        }
-
-        InfoMethodeAndController infoMethodeAndController = utils.ControllerUtils.findClassByUrl(listeInfoMethodeAndController, url);
+        ClassMethod infoMethodeAndController = utils.ControllerUtils.findClassByUrl(listeInfoMethodeAndController, url);
 
         if (infoMethodeAndController == null) {
-            for (InfoMethodeAndController info : listeInfoMethodeAndController) {
+            for (ClassMethod info : listeInfoMethodeAndController.values()) {
                 response.getWriter().println("<li>" + info.toString() + "</li>");
             }
         } else {
