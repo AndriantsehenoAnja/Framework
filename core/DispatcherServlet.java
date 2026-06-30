@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.HashMap;
 import utils.ControllerUtils;
 import utils.ClassMethod;
+import utils.UrlMethod;
 
 public class DispatcherServlet extends HttpServlet {
     List<String> listeControllers = new ArrayList<>();
-    Map<String,ClassMethod> listeInfoMethodeAndController = new HashMap<>();
+    Map<UrlMethod, ClassMethod> listeInfoMethodeAndController = new HashMap<>();
+    // Map<String,ClassMethod> listeInfoMethodeAndController = new HashMap<>();
     @Override
     public void init() throws ServletException {
         try{
@@ -20,7 +22,8 @@ public class DispatcherServlet extends HttpServlet {
             for(Class clazz:utils.ControllerUtils.getControllers(controllersPackage)){
                 listeControllers.add(clazz.getName());
             }
-            listeInfoMethodeAndController = utils.ControllerUtils.findAllMethodes(controllersPackage);
+            // listeInfoMethodeAndController = utils.ControllerUtils.findAllMethodes(controllersPackage);
+            listeInfoMethodeAndController = utils.ControllerUtils.findAllMethodesWithUrlMethod(controllersPackage);
         }catch (Exception e) {
             throw new ServletException("Erreur lors de l'initialisation du DispatcherServlet", e);
         }
@@ -30,6 +33,7 @@ public class DispatcherServlet extends HttpServlet {
         String servletPath = request.getRequestURI();
         String nameApplication = request.getContextPath();
         String url = servletPath.substring(nameApplication.length());
+        String method = request.getMethod();
 
         response.getWriter().println(
             "<!doctype html>\n" +
@@ -44,14 +48,21 @@ public class DispatcherServlet extends HttpServlet {
             "<ul>"
         );
 
-        ClassMethod infoMethodeAndController = utils.ControllerUtils.findClassByUrl(listeInfoMethodeAndController, url);
+        ClassMethod infoMethodeAndController = utils.ControllerUtils.findClassByUrlMethod(listeInfoMethodeAndController, url, method);
 
         if (infoMethodeAndController == null) {
             for (ClassMethod info : listeInfoMethodeAndController.values()) {
                 response.getWriter().println("<li>" + info.toString() + "</li>");
             }
         } else {
-            response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
+            // response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
+            infoMethodeAndController.getMethod().setAccessible(true);
+            try {   
+                Object controllerInstance = infoMethodeAndController.getClazz().getDeclaredConstructor().newInstance();
+                infoMethodeAndController.getMethod().invoke(controllerInstance, request, response); 
+            } catch (Exception e) {
+                throw new ServletException("Erreur lors de l'invocation de la méthode du contrôleur", e);
+            }
         }
 
         response.getWriter().println("</ul></body></html>");

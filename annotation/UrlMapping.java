@@ -7,4 +7,5 @@ import java.lang.annotation.*;
 public @interface UrlMapping {
 
     String value();
+    String method() default "GET";
 }
