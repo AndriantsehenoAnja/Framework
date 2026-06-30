@@ -27,6 +27,9 @@ public class ControllerUtils {
                     String url = urlMapping.value();
                     String httpMethod = urlMapping.method();
                     UrlMethod urlMethod = new UrlMethod(url, httpMethod);
+                    if (map.containsKey(urlMethod)) {
+                        throw new RuntimeException("Duplicate mapping for URL: " + url + " and HTTP method: " + httpMethod);
+                    }
                     ClassMethod classMethod = new ClassMethod(controllerClass, method);
                     map.put(urlMethod, classMethod);
                 }

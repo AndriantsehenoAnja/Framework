@@ -57,7 +57,7 @@ public class DispatcherServlet extends HttpServlet {
         } else {
             // response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
             infoMethodeAndController.getMethod().setAccessible(true);
-            try {
+            try {   
                 Object controllerInstance = infoMethodeAndController.getClazz().getDeclaredConstructor().newInstance();
                 infoMethodeAndController.getMethod().invoke(controllerInstance, request, response); 
             } catch (Exception e) {

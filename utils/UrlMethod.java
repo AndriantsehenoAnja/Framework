@@ -27,6 +27,9 @@ public class UrlMethod {
 
     @Override
     public boolean equals(Object other) {
+        if(this.url == null || this.method == null || other == null) {
+            return false;
+        }
         UrlMethod that = (UrlMethod) other;
         return this.url.equals(that.url) && this.method.equals(that.method);
     }
