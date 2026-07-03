@@ -3,7 +3,6 @@ package utils;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import mg.etu4370.annotation.UrlMapping;
@@ -17,8 +16,7 @@ public class ControllerUtils {
         }
     }
 
-    public static Map<UrlMethod, ClassMethod> findAllMethodesWithUrlMethod(String packageName) {
-        Map<UrlMethod, ClassMethod> map = new HashMap<>();
+    public static void findAllMethodesWithUrlMethod(String packageName,Map<UrlMethod, ClassMethod> map) {
         List<Class<?>> controllerClasses = getControllers(packageName);
         for (Class<?> controllerClass : controllerClasses) {
             for (Method method : controllerClass.getDeclaredMethods()) {
@@ -35,7 +33,6 @@ public class ControllerUtils {
                 }
             }
         }
-        return map;
     }
 
     public static ClassMethod findClassByUrlMethod(Map<UrlMethod, ClassMethod> map, String url, String httpMethod) {

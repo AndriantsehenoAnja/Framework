@@ -12,22 +12,12 @@ import utils.ClassMethod;
 import utils.UrlMethod;
 
 public class DispatcherServlet extends HttpServlet {
-    List<String> listeControllers = new ArrayList<>();
     Map<UrlMethod, ClassMethod> listeInfoMethodeAndController = new HashMap<>();
-    // Map<String,ClassMethod> listeInfoMethodeAndController = new HashMap<>();
     @Override
     public void init() throws ServletException {
-        try{
-            String controllersPackage = getServletConfig().getInitParameter("controller");
-            for(Class clazz:utils.ControllerUtils.getControllers(controllersPackage)){
-                listeControllers.add(clazz.getName());
-            }
-            // listeInfoMethodeAndController = utils.ControllerUtils.findAllMethodes(controllersPackage);
-            listeInfoMethodeAndController = utils.ControllerUtils.findAllMethodesWithUrlMethod(controllersPackage);
-        }catch (Exception e) {
-            throw new ServletException("Erreur lors de l'initialisation du DispatcherServlet", e);
-        }
+       listeInfoMethodeAndController = (Map<UrlMethod, ClassMethod>) this.getServletContext().getAttribute("listeInfoMethodeAndController");
     }
+    
     public void affichage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String servletPath = request.getRequestURI();
