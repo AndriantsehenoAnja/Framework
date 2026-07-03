@@ -1,4 +1,5 @@
 package listener;
+
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.annotation.WebListener;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 @WebListener
 public class AppListner implements ServletContextListener {
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         String controllersPackage = sce.getServletContext().getInitParameter("controller");
@@ -17,7 +19,12 @@ public class AppListner implements ServletContextListener {
         try {
             utils.ControllerUtils.findAllMethodesWithUrlMethod(controllersPackage, listeInfoMethodeAndController);
             sce.getServletContext().setAttribute("listeInfoMethodeAndController", listeInfoMethodeAndController);
-        } catch (Exception e) {
+        }
+         catch(RuntimeException ee){
+            System.out.println("erreur:"+ee.getMessage());
+            throw ee;
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("Application démarrée !");
@@ -26,7 +33,8 @@ public class AppListner implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // Code à exécuter lors de l'arrêt de l'application
+        sce.getServletContext().removeAttribute("listeInfoMethodeAndController");
         System.out.println("Application arrêtée !");
     }
-    
+
 }

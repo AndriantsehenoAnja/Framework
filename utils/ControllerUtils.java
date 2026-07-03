@@ -16,7 +16,7 @@ public class ControllerUtils {
         }
     }
 
-    public static void findAllMethodesWithUrlMethod(String packageName,Map<UrlMethod, ClassMethod> map) {
+    public static void findAllMethodesWithUrlMethod(String packageName,Map<UrlMethod, ClassMethod> map)throws RuntimeException {
         List<Class<?>> controllerClasses = getControllers(packageName);
         for (Class<?> controllerClass : controllerClasses) {
             for (Method method : controllerClass.getDeclaredMethods()) {
