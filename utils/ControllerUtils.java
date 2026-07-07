@@ -2,12 +2,27 @@ package utils;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import jakarta.servlet.http.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import mg.etu4370.annotation.UrlMapping;
 
 public class ControllerUtils {
+
+    public static void execute(Object method,HttpServletRequest request, HttpServletResponse response){
+        if(method instanceof ModelAndView){
+            ModelAndView modelAndView = (ModelAndView) method;
+            try {
+                for(Map.Entry<String, Object> entry : modelAndView.getAttributs().entrySet()) {
+                    request.setAttribute(entry.getKey(), entry.getValue());
+                }
+                request.getRequestDispatcher(modelAndView.getView()).forward(request, response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     public static boolean isAnnotationMethod(Method m) {
         if (m.isAnnotationPresent(UrlMapping.class)) {
             return true;
@@ -38,25 +53,6 @@ public class ControllerUtils {
     public static ClassMethod findClassByUrlMethod(Map<UrlMethod, ClassMethod> map, String url, String httpMethod) {
         return map.get(new UrlMethod(url, httpMethod));
     }
-    // public static Map<String, ClassMethod> findAllMethodes(String packageName) {
-    //     Map<String, ClassMethod> map = new HashMap<>();
-    //     List<Class<?>> controllerClasses = getControllers(packageName);
-    //     for (Class<?> controllerClass : controllerClasses) {
-    //         for (Method method : controllerClass.getDeclaredMethods()) {
-    //             if (isAnnotationMethod(method)) {
-    //                 UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
-    //                 String url = urlMapping.value();
-    //                 ClassMethod classMethod = new ClassMethod(controllerClass, method);
-    //                 map.put(url, classMethod);
-    //             }
-    //         }
-    //     }
-    //     return map;
-    // }
-
-    // public static ClassMethod findClassByUrl(Map<String, ClassMethod> map, String url) {
-    //     return map.get(url);
-    // }
 
     public static List<Class<?>> getControllers(String packageName) {
         List<Class<?>> classe = new ArrayList<>();

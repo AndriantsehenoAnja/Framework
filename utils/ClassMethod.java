@@ -32,4 +32,15 @@ public class ClassMethod {
                 ", method=" + method.getName() +
                 '}';
     }
+    public Object execute(){
+        try{
+            method.setAccessible(true);
+            Object controllerInstance = method.getDeclaringClass().getDeclaredConstructor().newInstance();
+            Object meth = method.invoke(controllerInstance);
+            return meth;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
