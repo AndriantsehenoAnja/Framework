@@ -7,17 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import mg.etu4370.annotation.UrlMapping;
+import mg.etu4370.utils.ModelAndView;
 
 public class ControllerUtils {
 
-    public static void execute(Object method,HttpServletRequest request, HttpServletResponse response){
+    public static void execute(Object method,String pathSource,String extension,HttpServletRequest request, HttpServletResponse response)
+        {
         if(method instanceof ModelAndView){
+            String view = pathSource + ((ModelAndView) method).getView() + extension;
             ModelAndView modelAndView = (ModelAndView) method;
             try {
                 for(Map.Entry<String, Object> entry : modelAndView.getAttributs().entrySet()) {
                     request.setAttribute(entry.getKey(), entry.getValue());
+                    System.out.println("Attribute added: " + entry.getKey() + " = " + entry.getValue());
                 }
-                request.getRequestDispatcher(modelAndView.getView()).forward(request, response);
+                request.getRequestDispatcher(view).forward(request, response);
             } catch (Exception e) {
                 e.printStackTrace();
             }

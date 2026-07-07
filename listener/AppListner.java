@@ -15,10 +15,14 @@ public class AppListner implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         String controllersPackage = sce.getServletContext().getInitParameter("controller");
+        String pathSource = sce.getServletContext().getInitParameter("pathSource");
+        String extension = sce.getServletContext().getInitParameter("extension");
         Map<UrlMethod, ClassMethod> listeInfoMethodeAndController = new HashMap<>();
         try {
             utils.ControllerUtils.findAllMethodesWithUrlMethod(controllersPackage, listeInfoMethodeAndController);
             sce.getServletContext().setAttribute("listeInfoMethodeAndController", listeInfoMethodeAndController);
+            sce.getServletContext().setAttribute("pathSource", pathSource);
+            sce.getServletContext().setAttribute("extension", extension);
         }
          catch(RuntimeException ee){
             System.out.println("erreur:"+ee.getMessage());
