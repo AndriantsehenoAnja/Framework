@@ -32,4 +32,16 @@ public class ClassMethod {
                 ", method=" + method.getName() +
                 '}';
     }
+    public Object execute(){
+        try{
+            method.setAccessible(true);
+            Object controllerInstance = clazz.getDeclaredConstructor().newInstance();
+            Object meth = method.invoke(controllerInstance);
+            System.out.println("Method executed: " + method.getName() + "()");
+            return meth;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -13,9 +13,13 @@ import utils.UrlMethod;
 
 public class DispatcherServlet extends HttpServlet {
     Map<UrlMethod, ClassMethod> listeInfoMethodeAndController = new HashMap<>();
+    String pathSource;
+    String extension;
     @Override
     public void init() throws ServletException {
        listeInfoMethodeAndController = (Map<UrlMethod, ClassMethod>) this.getServletContext().getAttribute("listeInfoMethodeAndController");
+       pathSource = (String) this.getServletContext().getAttribute("pathSource");
+       extension = (String) this.getServletContext().getAttribute("extension");
     }
     
     public void affichage(HttpServletRequest request, HttpServletResponse response)
@@ -25,37 +29,18 @@ public class DispatcherServlet extends HttpServlet {
         String url = servletPath.substring(nameApplication.length());
         String method = request.getMethod();
 
-        response.getWriter().println(
-            "<!doctype html>\n" +
-            "<html lang=\"en\">\n" +
-            "<head>\n" +
-            "    <meta charset=\"utf-8\">\n" +
-            "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n" +
-            "    <title>Liste des controllers et methodes</title>\n" +
-            "</head>\n" +
-            "<body>\n" +
-            "<h1>Liste des controllers et methodes</h1>\n" +
-            "<ul>"
-        );
-
         ClassMethod infoMethodeAndController = utils.ControllerUtils.findClassByUrlMethod(listeInfoMethodeAndController, url, method);
 
         if (infoMethodeAndController == null) {
             for (ClassMethod info : listeInfoMethodeAndController.values()) {
-                response.getWriter().println("<li>" + info.toString() + "</li>");
+                response.getWriter().println(info.toString());
             }
         } else {
-            // response.getWriter().println("<li>" + infoMethodeAndController.toString() + "</li>");
-            infoMethodeAndController.getMethod().setAccessible(true);
-            try {   
-                Object controllerInstance = infoMethodeAndController.getClazz().getDeclaredConstructor().newInstance();
-                infoMethodeAndController.getMethod().invoke(controllerInstance, request, response); 
-            } catch (Exception e) {
-                throw new ServletException("Erreur lors de l'invocation de la méthode du contrôleur", e);
-            }
+
+            Object result = infoMethodeAndController.execute();
+            utils.ControllerUtils.execute(result, pathSource, extension, request, response);
         }
 
-        response.getWriter().println("</ul></body></html>");
     }
 
     @Override
@@ -70,12 +55,17 @@ public class DispatcherServlet extends HttpServlet {
                 || uri.endsWith(".jpg")
                 || uri.endsWith(".gif")
                 || uri.endsWith(".ico")
-                || uri.endsWith(".svg")
-                || uri.endsWith(".jsp")) {
+                || uri.endsWith(".svg")) {
 
             request.getServletContext()
                 .getNamedDispatcher("default")
                 .forward(request, response);
+            return;
+        }
+        if(uri.endsWith(".jsp")) {
+            request.getServletContext().
+            getNamedDispatcher("jsp").
+            forward(request, response);
             return;
         }
         affichage(request, response);
@@ -93,12 +83,17 @@ public class DispatcherServlet extends HttpServlet {
                 || uri.endsWith(".jpg")
                 || uri.endsWith(".gif")
                 || uri.endsWith(".ico")
-                || uri.endsWith(".svg")
-                || uri.endsWith(".jsp")) {
+                || uri.endsWith(".svg")) {
 
             request.getServletContext()
                 .getNamedDispatcher("default")
                 .forward(request, response);
+            return;
+        }
+        if(uri.endsWith(".jsp")) {
+            request.getServletContext().
+            getNamedDispatcher("jsp").
+            forward(request, response);
             return;
         }
         affichage(request, response);
