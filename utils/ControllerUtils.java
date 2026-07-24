@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import mg.etu4370.annotation.UrlMapping;
+import mg.etu4370.annotation.Inject;
 import mg.etu4370.utils.ModelAndView;
 
+import org.springframework.web.context.WebApplicationContext;
+import java.lang.reflect.Field;
 public class ControllerUtils {
 
     public static void execute(Object method,String pathSource,String extension,HttpServletRequest request, HttpServletResponse response)
@@ -35,25 +38,52 @@ public class ControllerUtils {
         }
     }
 
-    public static void findAllMethodesWithUrlMethod(String packageName,Map<UrlMethod, ClassMethod> map)throws RuntimeException {
+    public static void findAllMethodesWithUrlMethod(WebApplicationContext springContext, String packageName, Map<UrlMethod, ClassMethod> map) throws RuntimeException {
         List<Class<?>> controllerClasses = getControllers(packageName);
+        
         for (Class<?> controllerClass : controllerClasses) {
-            for (Method method : controllerClass.getDeclaredMethods()) {
-                if (isAnnotationMethod(method)) {
-                    UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
-                    String url = urlMapping.value();
-                    String httpMethod = urlMapping.method();
-                    UrlMethod urlMethod = new UrlMethod(url, httpMethod);
-                    if (map.containsKey(urlMethod)) {
-                        throw new RuntimeException("Duplicate mapping for URL: " + url + " and HTTP method: " + httpMethod);
+            try {
+                // 1. 🏗️ On crée l'instance unique (le Singleton) du contrôleur
+                Object controllerInstance = controllerClass.getDeclaredConstructor().newInstance();
+                
+                // 2. 🪞 On inspecte les attributs pour l'injection
+                Field[] fields = controllerClass.getDeclaredFields();
+                for (Field field : fields) {
+                    if (field.isAnnotationPresent(Inject.class)) {
+                        Class<?> fieldType = field.getType();
+                        
+                        // 🍃 On récupère le bean Spring
+                        Object bean = springContext.getBean(fieldType);
+                        
+                        // 💉 On injecte le bean dans notre INSTANCE de contrôleur
+                        field.setAccessible(true);
+                        field.set(controllerInstance, bean); 
                     }
-                    ClassMethod classMethod = new ClassMethod(controllerClass, method);
-                    map.put(urlMethod, classMethod);
                 }
+                
+                // 3. 🗺️ On associe les méthodes à cette instance précise
+                for (Method method : controllerClass.getDeclaredMethods()) {
+                    if (isAnnotationMethod(method)) {
+                        UrlMapping urlMapping = method.getAnnotation(UrlMapping.class);
+                        String url = urlMapping.value();
+                        String httpMethod = urlMapping.method();
+                        UrlMethod urlMethod = new UrlMethod(url, httpMethod);
+                        
+                        if (map.containsKey(urlMethod)) {
+                            throw new RuntimeException("Duplicate mapping for URL: " + url + " and HTTP method: " + httpMethod);
+                        }
+                        
+                        // 💡 Ici, ClassMethod devra stocker "controllerInstance" au lieu de "controllerClass"
+                        ClassMethod classMethod = new ClassMethod(controllerInstance, method);
+                        map.put(urlMethod, classMethod);
+                    }
+                }
+                
+            } catch (Exception e) {
+                throw new RuntimeException("Erreur lors de l'initialisation du contrôleur " + controllerClass.getName(), e);
             }
         }
     }
-
     public static ClassMethod findClassByUrlMethod(Map<UrlMethod, ClassMethod> map, String url, String httpMethod) {
         return map.get(new UrlMethod(url, httpMethod));
     }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         version="6.0">
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+    <!-- exactement-->
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>core.DispatcherServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Controller -->
+    <context-param>
+        <param-name>controller</param-name> <!-- exactement -->
+        <param-value>mg.itu.controller</param-value> <!-- nom de package de controller -->
+    </context-param>
+    <!-- source de la view -->
+    <context-param>
+        <param-name>pathSource</param-name><!-- exactement -->
+        <param-value>/</param-value><!-- chemin vers la source de la vue -->
+    </context-param>
+
+    <!-- extension des views -->
+    <context-param>
+        <param-name>extension</param-name><!-- exactement -->
+        <param-value>.jsp</param-value><!-- extension des views -->
+    </context-param>
+    <!-- declaration de spring listener -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/applicationContext.xml</param-value><!-- applicationContext.xml exactement mais avec le lien vers ce fichier -->
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <!--  -->
+</web-app>
