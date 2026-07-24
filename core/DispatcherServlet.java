@@ -21,7 +21,7 @@ public class DispatcherServlet extends HttpServlet {
        pathSource = (String) this.getServletContext().getAttribute("pathSource");
        extension = (String) this.getServletContext().getAttribute("extension");
     }
-    
+
     public void affichage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String servletPath = request.getRequestURI();
