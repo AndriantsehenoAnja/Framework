@@ -1,5 +1,6 @@
 package utils;
 import java.lang.reflect.Method;
+
 public class ClassMethod {
     // Class<?> clazz;
     Method method;
@@ -43,6 +44,7 @@ public class ClassMethod {
     //             ", method=" + method.getName() +
     //             '}';
     // }
+        
     public Object execute(){
         try{
             method.setAccessible(true);

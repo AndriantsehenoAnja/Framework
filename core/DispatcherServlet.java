@@ -10,7 +10,7 @@ import java.util.HashMap;
 import utils.ControllerUtils;
 import utils.ClassMethod;
 import utils.UrlMethod;
-
+import com.google.gson.Gson;
 public class DispatcherServlet extends HttpServlet {
     Map<UrlMethod, ClassMethod> listeInfoMethodeAndController = new HashMap<>();
     String pathSource;
@@ -36,9 +36,16 @@ public class DispatcherServlet extends HttpServlet {
                 response.getWriter().println(info.toString());
             }
         } else {
-
             Object result = infoMethodeAndController.execute();
-            utils.ControllerUtils.execute(result, pathSource, extension, request, response);
+            if(ControllerUtils.isApiRestMethod(infoMethodeAndController.getMethod())){
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                Gson gson = new Gson();
+                String jsonResponse = gson.toJson(result);
+                response.getWriter().write(jsonResponse);
+            }else{
+                utils.ControllerUtils.execute(result, pathSource, extension, request, response);
+            }
         }
 
     }

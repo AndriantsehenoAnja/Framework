@@ -9,10 +9,20 @@ import java.util.Map;
 import mg.etu4370.annotation.UrlMapping;
 import mg.etu4370.annotation.Inject;
 import mg.etu4370.utils.ModelAndView;
-
+import mg.etu4370.annotation.ApiRest;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 public class ControllerUtils {
+
+    public static boolean isApiRestMethod(Method m) {
+        if (m.isAnnotationPresent(ApiRest.class)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public static void execute(Object method,String pathSource,String extension,HttpServletRequest request, HttpServletResponse response)
         {
@@ -80,6 +90,7 @@ public class ControllerUtils {
                 }
                 
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException("Erreur lors de l'initialisation du contrôleur " + controllerClass.getName(), e);
             }
         }
