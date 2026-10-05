@@ -36,7 +36,7 @@ public class DispatcherServlet extends HttpServlet {
                 response.getWriter().println(info.toString());
             }
         } else {
-            Object result = infoMethodeAndController.execute();
+            Object result = infoMethodeAndController.execute(request);
             if(ControllerUtils.isApiRestMethod(infoMethodeAndController.getMethod())){
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -49,7 +49,7 @@ public class DispatcherServlet extends HttpServlet {
         }
 
     }
-
+ 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
