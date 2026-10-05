@@ -1,58 +1,51 @@
 package utils;
+
 import java.lang.reflect.Method;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class ClassMethod {
-    // Class<?> clazz;
-    Method method;
-    Object controllerInstance;
-    public ClassMethod( Object controllerInstance, Method method) {
-        this.method = method;
-        this.controllerInstance = controllerInstance;
-    }
-    // public ClassMethod(Class<?> clazz, Method method) {
-    //     this.clazz = clazz;
-    //     this.method = method;
-    // }
+    private Method method;
+    private Object controllerInstance;
 
-    // public Class<?> getClazz() {
-    //     return clazz;
-    // }
+    // Constructeur au démarrage (SANS HttpServletRequest)
+    public ClassMethod(Object controllerInstance, Method method) {
+        this.controllerInstance = controllerInstance;
+        this.method = method;
+    }
 
     public Method getMethod() {
         return method;
     }
 
-    // public void setClazz(Class<?> clazz) {
-    //     this.clazz = clazz;
-    // }
-
     public void setMethod(Method method) {
         this.method = method;
+    }
+
+    public Object getControllerInstance() {
+        return controllerInstance;
     }
 
     public void setControllerInstance(Object controllerInstance) {
         this.controllerInstance = controllerInstance;
     }
-    public Object getControllerInstance() {
-        return controllerInstance;
-    }
 
-    // @Override
-    // public String toString() {
-    //     return "ClassMethod{" +
-    //             "clazz=" + clazz.getName() +
-    //             ", method=" + method.getName() +
-    //             '}';
-    // }
-        
-    public Object execute(){
-        try{
+    /**
+     * Exécute la méthode du contrôleur en résolvant les paramètres 
+     * à partir de la requête HTTP passée en argument.
+     */
+    public Object execute(HttpServletRequest request) {
+        try {
             method.setAccessible(true);
-            // Object controllerInstance = clazz.getDeclaredConstructor().newInstance();
-            Object meth = method.invoke(controllerInstance);
+            
+            // Résolution des arguments dynamiques issus de la requête HTTP
+            Object[] args = ParameterResolver.resolveParameters(method, request);
+
+            // Invocations de la méthode avec ses arguments
+            Object result = method.invoke(controllerInstance, args);
             System.out.println("Method executed: " + method.getName() + "()");
-            return meth;
-        }catch(Exception e){
+            return result;
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

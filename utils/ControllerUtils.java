@@ -40,6 +40,7 @@ public class ControllerUtils {
             }
         }
     }
+    
     public static boolean isAnnotationMethod(Method m) {
         if (m.isAnnotationPresent(UrlMapping.class)) {
             return true;
