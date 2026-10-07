@@ -1,8 +1,6 @@
 # Framework
-## sprint4 tsotra
-- ampina 
-## sprint4 bis
-## sprint7 
-ajout annotation apiRest pour savoire si l'url est un api ou simple
-si string le type de retour :en dispatch
-si autre : on convertir en json et on le print
+## utilisation de la framework
+- envoy des Object vers controllers : 
+    exemple:- model user avec attribut : name et password
+            - dans controller :{void save(@AnjaParameter ("user") user)}
+            - dans le jsp doit etre name = "user.name" et name = "user.password"
