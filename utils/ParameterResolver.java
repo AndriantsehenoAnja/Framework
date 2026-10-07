@@ -15,7 +15,59 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import mg.etu4370.annotation.AnjaParameter;
 public class ParameterResolver {
+    private static Object buildObject(
+            Class<?> type,
+            String prefix,
+            HttpServletRequest request
+    ) throws Exception {
 
+        Object object = type.getDeclaredConstructor().newInstance();
+
+        for (Field field : type.getDeclaredFields()) {
+
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
+            field.setAccessible(true);
+
+            String fieldName = field.getName();
+
+            String parameterName;
+
+            if (prefix == null || prefix.isEmpty()) {
+                parameterName = fieldName;
+            } else {
+                parameterName = prefix + "." + fieldName;
+            }
+
+            Class<?> fieldType = field.getType();
+
+            // Objet simple
+            if (isSimpleType(fieldType)) {
+
+                String value = request.getParameter(parameterName);
+
+                if (value != null) {
+                    Object converted =
+                        convertSimpleType(fieldType, value);
+
+                    field.set(object, converted);
+                }
+
+            } 
+            // Objet complexe
+            else {
+
+                Object childObject =
+                    buildObject(fieldType, parameterName, request);
+
+                field.set(object, childObject);
+            }
+        }
+
+        return object;
+    }
     public static Object[] resolveParameters(Method method, HttpServletRequest request) {
         Parameter[] parameters = method.getParameters();
         Object[] resolvedParameters = new Object[parameters.length];
@@ -34,19 +86,38 @@ public class ParameterResolver {
 
                     String httpValue = request.getParameter(paramName);
                     resolvedParameters[i] = convertSimpleType(paramType, httpValue);
+            }else{
+
+                try {
+                String paramName = parameter.isNamePresent() ? parameter.getName() : null;
+
+                    if (parameter.isAnnotationPresent(AnjaParameter.class)) {
+                        paramName = parameter.getAnnotation(AnjaParameter.class).name();
+                    }
+                    Object complexObject = buildObject(paramType,paramName ,request);
+                    resolvedParameters[i] = complexObject;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         return resolvedParameters;
     }
     private static boolean isSimpleType(Class<?> clazz) {
-        return clazz.equals(String.class) ||
-               clazz.equals(int.class) || clazz.equals(Integer.class) ||
-               clazz.equals(double.class) || clazz.equals(Double.class) ||
-               clazz.equals(float.class) || clazz.equals(Float.class) ||
-               clazz.equals(boolean.class) || clazz.equals(Boolean.class) ||
-               clazz.equals(long.class) || clazz.equals(Long.class);
-    }
+    return clazz.equals(String.class)
+        || clazz.equals(int.class)
+        || clazz.equals(Integer.class)
+        || clazz.equals(double.class)
+        || clazz.equals(Double.class)
+        || clazz.equals(float.class)
+        || clazz.equals(Float.class)
+        || clazz.equals(boolean.class)
+        || clazz.equals(Boolean.class)
+        || clazz.equals(long.class)
+        || clazz.equals(Long.class)
+        || clazz.equals(LocalDate.class);
+}
 
     private static Object convertSimpleType(Class<?> targetType, String value) {
         if (value == null || value.trim().isEmpty()) {
